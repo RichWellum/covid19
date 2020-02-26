@@ -1,5 +1,10 @@
 #!/usr/local/bin/python3
-"""Grab some info about covid19."""
+"""Grab some info about covid19.
+
+All data pulled from: https://github.com/CSSEGISandData/COVID-19
+
+Recommend doing: 'watch -d ./covid19.py'
+"""
 
 import argparse
 import json
@@ -9,6 +14,11 @@ from argparse import RawDescriptionHelpFormatter
 
 import pandas as pd
 import requests
+from colorama import init
+from termcolor import colored
+
+# use Colorama to make Termcolor work
+init(autoreset=True)
 
 
 class AbortScriptException(Exception):
@@ -135,13 +145,27 @@ def main():
         covid19.display_user_inputs()
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
         deaths = int(covid19.get_csv_crunch_total(url))
+
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
         confirmed = int(covid19.get_csv_crunch_total(url))
+
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
         recovered = int(covid19.get_csv_crunch_total(url))
-        percent_died = (deaths / confirmed * 100)
 
-        print_banner('COVID19 Report:: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}'.format(deaths, confirmed, recovered, str(round(percent_died, 2))))
+        percent_died = (deaths / confirmed * 100)
+        percent_died_round = str(round(percent_died, 2))
+
+        if args.verbose:
+            print_banner('COVID19 Report:: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}'.format(deaths, confirmed, recovered, percent_died_round))
+
+        print()
+        print(colored('Covid19! Report:::  ', 'cyan'), end='')
+        print(colored('Confirmed: {},'.format(confirmed), 'blue'), end='')
+        print(colored(' Recovered: {},'.format(recovered), 'green'), end='')
+        print(colored(' Deaths: {},'.format(deaths), 'red'), end='')
+        print(colored(' Percentage Died: {}'.format(percent_died_round), 'magenta'))
+        print()
+
     except Exception:
         print("Exception caught:")
         print(sys.exc_info())
