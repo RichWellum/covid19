@@ -166,6 +166,10 @@ def main():
         print(colored(' Percentage Died: {}'.format(percent_died_round), 'magenta'))
         print()
 
+        # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
+        # test = covid19.get_rest(url)
+        # print(test)
+
     except Exception:
         print("Exception caught:")
         print(sys.exc_info())
