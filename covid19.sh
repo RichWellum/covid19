@@ -1,3 +1,4 @@
 #!/bin/bash
 # Simple bash script to run covid19 infinitely
-while true; do ./covid19.py; sleep 600; done
+# Wait 1 hour between refreshes
+while true; do ./covid19.py; sleep 3600; done
