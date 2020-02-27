@@ -76,13 +76,13 @@ def print_banner(description):
 
 def download_file(url):
     """Download a url contents carefully."""
-    local_filename = url.split('/')[-1]
+    local_filename = url.split("/")[-1]
     # NOTE the stream=True parameter below
     with requests.get(url, stream=True) as req:
         req.raise_for_status()
-        with open(local_filename, 'wb') as file:
+        with open(local_filename, "wb") as file:
             for chunk in req.iter_content(chunk_size=8192):
-                if chunk: # filter out keep-alive new chunks
+                if chunk:  # filter out keep-alive new chunks
                     file.write(chunk)
                     # f.flush()
     return local_filename
@@ -128,21 +128,21 @@ class Covid19:
 
         # Grab the symbol and diff
         if prev == 0 or now == prev:
-            symbol = '<->'
+            symbol = "<->"
             diff = 0
         elif now > prev:
-            symbol = '^'
-            diff = '+{}'.format(now - prev)
+            symbol = "^"
+            diff = "+{}".format(now - prev)
         else:
-            symbol = 'v'
-            diff = '-{}'.format(prev - now)
+            symbol = "v"
+            diff = "-{}".format(prev - now)
 
         return (symbol, diff)
 
     def get_rest(self, url):
         """Get the REST API and process the results."""
         response = requests.request("GET", url)
-        response.raise_for_status() # raise exception if invalid response
+        response.raise_for_status()  # raise exception if invalid response
         if self.verbose:
             json_object = json.loads(response.text)
             json_formatted_str = json.dumps(json_object, indent=2)
@@ -154,12 +154,7 @@ class Covid19:
         if not self.verbose:
             return
 
-        print_banner(
-            "Force = {}, Verbose = {}".format(
-                self.force,
-                self.verbose,
-            )
-        )
+        print_banner("Force = {}, Verbose = {}".format(self.force, self.verbose,))
 
     def get_csv_crunch_total(self, url):
         """Grab all the confirmed cases."""
@@ -193,31 +188,67 @@ def main():
 
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
         deaths = int(covid19.get_csv_crunch_total(url))
-        deaths_symbol, deaths_diff = covid19.get_symbol(deaths, 'deaths')
+        deaths_symbol, deaths_diff = covid19.get_symbol(deaths, "deaths")
 
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
         confirmed = int(covid19.get_csv_crunch_total(url))
-        confirmed_symbol, confirmed_diff = covid19.get_symbol(confirmed, 'confirmed')
+        confirmed_symbol, confirmed_diff = covid19.get_symbol(confirmed, "confirmed")
 
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
         recovered = int(covid19.get_csv_crunch_total(url))
-        recovered_symbol, recovered_diff = covid19.get_symbol(recovered, 'recovered')
+        recovered_symbol, recovered_diff = covid19.get_symbol(recovered, "recovered")
 
-        percent_died = (deaths / confirmed * 100)
+        percent_died = deaths / confirmed * 100
         percent_died_round = str(round(percent_died, 2))
-        percent_died_round_symbol, percent_died_round_diff = covid19.get_symbol(percent_died_round, 'percent_died_round')
+        percent_died_round_symbol, percent_died_round_diff = covid19.get_symbol(
+            percent_died_round, "percent_died_round"
+        )
 
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
         if args.verbose:
-            print_banner('COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}'.format(dt_string, deaths, confirmed, recovered, percent_died_round))
+            print_banner(
+                "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}".format(
+                    dt_string, deaths, confirmed, recovered, percent_died_round
+                )
+            )
 
         print()
-        print(colored('({}) Covid19! Report:::  '.format(dt_string), 'cyan'), end='')
-        print(colored('Confirmed({})({}): {},'.format(confirmed_symbol, confirmed_diff, confirmed), 'blue'), end='')
-        print(colored(' Recovered({})({}): {},'.format(recovered_symbol, recovered_diff, recovered), 'green'), end='')
-        print(colored(' Deaths({})({}): {},'.format(deaths_symbol, deaths_diff, deaths), 'red'), end='')
-        print(colored(' Percentage Died({})({}): {}'.format(percent_died_round_symbol, percent_died_round_diff, percent_died_round), 'magenta'))
+        print(colored("({}) Covid19! Report:::  ".format(dt_string), "cyan"), end="")
+        print(
+            colored(
+                "Confirmed({})({}): {},".format(
+                    confirmed_symbol, confirmed_diff, confirmed
+                ),
+                "blue",
+            ),
+            end="",
+        )
+        print(
+            colored(
+                " Recovered({})({}): {},".format(
+                    recovered_symbol, recovered_diff, recovered
+                ),
+                "green",
+            ),
+            end="",
+        )
+        print(
+            colored(
+                " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths), "red"
+            ),
+            end="",
+        )
+        print(
+            colored(
+                " Percentage Died({})({}): {}".format(
+                    percent_died_round_symbol,
+                    percent_died_round_diff,
+                    percent_died_round,
+                ),
+                "magenta",
+            )
+        )
         print()
 
         # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
