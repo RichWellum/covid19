@@ -14,4 +14,21 @@ the last known column, which is also the latest.
 
 ![Output looks like](./output_colored.png)
 
-Can also be run continuously with 'watch -d ./covid19.py'
+To install:
+
+```bash
+    brew install pipenv
+    pipenv install
+```
+
+To run infinitely:
+
+```bash
+    while true; do ./covid19.py; sleep 30; done
+```
+
+Or:
+
+```bash
+    ./covid19.sh
+```
