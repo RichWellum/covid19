@@ -16,6 +16,7 @@ import pandas as pd
 import requests
 from colorama import init
 from termcolor import colored
+from datetime import datetime
 
 # use Colorama to make Termcolor work
 init(autoreset=True)
@@ -90,6 +91,10 @@ def download_file(url):
 class Covid19:
     """Process all inputs from the user."""
 
+    pd.options.display.max_rows = None
+    pd.options.display.max_columns = None
+    pd.options.display.width = None
+
     def __init__(self, args):
         """Initialize all variables from argparse if any."""
         self.force = args.force
@@ -143,6 +148,10 @@ def main():
     try:
         covid19 = Covid19(args)
         covid19.display_user_inputs()
+
+        # datetime object containing current date and time
+        now = datetime.now()
+
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
         deaths = int(covid19.get_csv_crunch_total(url))
 
@@ -155,11 +164,13 @@ def main():
         percent_died = (deaths / confirmed * 100)
         percent_died_round = str(round(percent_died, 2))
 
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
         if args.verbose:
-            print_banner('COVID19 Report:: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}'.format(deaths, confirmed, recovered, percent_died_round))
+            print_banner('COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}'.format(dt_string, deaths, confirmed, recovered, percent_died_round))
 
         print()
-        print(colored('Covid19! Report:::  ', 'cyan'), end='')
+        print(colored('({}) Covid19! Report:::  '.format(dt_string), 'cyan'), end='')
         print(colored('Confirmed: {},'.format(confirmed), 'blue'), end='')
         print(colored(' Recovered: {},'.format(recovered), 'green'), end='')
         print(colored(' Deaths: {},'.format(deaths), 'red'), end='')
