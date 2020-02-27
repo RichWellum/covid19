@@ -99,6 +99,45 @@ class Covid19:
         """Initialize all variables from argparse if any."""
         self.force = args.force
         self.verbose = args.verbose
+        self.previous_confirmed = 0
+        self.previous_recovered = 0
+        self.previous_deaths = 0
+        self.previous_percentage = 0
+
+    def get_symbol(self, now, handle):
+        """Calculate whether the number has increased or decreased."""
+        # Calculate the difference and marker
+        if handle == "deaths":
+            prev = self.previous_deaths
+        elif handle == "confirmed":
+            prev = self.previous_confirmed
+        elif handle == "recovered":
+            prev = self.previous_recovered
+        else:
+            prev = self.previous_percentage
+
+        # Reset the previous values
+        if handle == "deaths":
+            self.previous_deaths = now
+        elif handle == "confirmed":
+            self.previous_confirmed = now
+        elif handle == "recovered":
+            self.previous_recovered = now
+        else:
+            self.previous_percentage = now
+
+        # Grab the symbol and diff
+        if prev == 0 or now == prev:
+            symbol = '<->'
+            diff = 0
+        elif now > prev:
+            symbol = '^'
+            diff = '+{}'.format(now - prev)
+        else:
+            symbol = 'v'
+            diff = '-{}'.format(prev - now)
+
+        return (symbol, diff)
 
     def get_rest(self, url):
         """Get the REST API and process the results."""
@@ -154,15 +193,19 @@ def main():
 
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
         deaths = int(covid19.get_csv_crunch_total(url))
+        deaths_symbol, deaths_diff = covid19.get_symbol(deaths, 'deaths')
 
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
         confirmed = int(covid19.get_csv_crunch_total(url))
+        confirmed_symbol, confirmed_diff = covid19.get_symbol(confirmed, 'confirmed')
 
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
         recovered = int(covid19.get_csv_crunch_total(url))
+        recovered_symbol, recovered_diff = covid19.get_symbol(recovered, 'recovered')
 
         percent_died = (deaths / confirmed * 100)
         percent_died_round = str(round(percent_died, 2))
+        percent_died_round_symbol, percent_died_round_diff = covid19.get_symbol(percent_died_round, 'percent_died_round')
 
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -171,10 +214,10 @@ def main():
 
         print()
         print(colored('({}) Covid19! Report:::  '.format(dt_string), 'cyan'), end='')
-        print(colored('Confirmed: {},'.format(confirmed), 'blue'), end='')
-        print(colored(' Recovered: {},'.format(recovered), 'green'), end='')
-        print(colored(' Deaths: {},'.format(deaths), 'red'), end='')
-        print(colored(' Percentage Died: {}'.format(percent_died_round), 'magenta'))
+        print(colored('Confirmed({})({}): {},'.format(confirmed_symbol, confirmed_diff, confirmed), 'blue'), end='')
+        print(colored(' Recovered({})({}): {},'.format(recovered_symbol, recovered_diff, recovered), 'green'), end='')
+        print(colored(' Deaths({})({}): {},'.format(deaths_symbol, deaths_diff, deaths), 'red'), end='')
+        print(colored(' Percentage Died({})({}): {}'.format(percent_died_round_symbol, percent_died_round_diff, percent_died_round), 'magenta'))
         print()
 
         # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
