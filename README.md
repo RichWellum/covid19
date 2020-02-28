@@ -13,6 +13,8 @@ ofthe last known column, which is also the latest.
 
 ![Output looks like](./output_colored.png)
 
+Run until you quit or die of COVID19
+
 To install:
 
 ```bash
@@ -20,16 +22,4 @@ To install:
     brew install pipenv
     pipenv install
     ./covid19.py
-```
-
-To run infinitely, E.g.:
-
-```bash
-    while true; do ./covid19.py; sleep 30; done
-```
-
-Or:
-
-```bash
-    ./covid19.sh
 ```
