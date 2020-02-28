@@ -17,6 +17,7 @@ import requests
 from colorama import init
 from termcolor import colored
 from datetime import datetime
+import time
 
 # use Colorama to make Termcolor work
 init(autoreset=True)
@@ -179,86 +180,88 @@ def main():
     """Call everything."""
     args = parse_args()
 
-    try:
-        covid19 = Covid19(args)
-        covid19.display_user_inputs()
+    while True:
+        try:
+            covid19 = Covid19(args)
+            covid19.display_user_inputs()
 
-        # datetime object containing current date and time
-        now = datetime.now()
+            # datetime object containing current date and time
+            now = datetime.now()
 
-        url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
-        deaths = int(covid19.get_csv_crunch_total(url))
-        deaths_symbol, deaths_diff = covid19.get_symbol(deaths, "deaths")
+            url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+            deaths = int(covid19.get_csv_crunch_total(url))
+            deaths_symbol, deaths_diff = covid19.get_symbol(deaths, "deaths")
 
-        url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-        confirmed = int(covid19.get_csv_crunch_total(url))
-        confirmed_symbol, confirmed_diff = covid19.get_symbol(confirmed, "confirmed")
+            url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+            confirmed = int(covid19.get_csv_crunch_total(url))
+            confirmed_symbol, confirmed_diff = covid19.get_symbol(confirmed, "confirmed")
 
-        url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
-        recovered = int(covid19.get_csv_crunch_total(url))
-        recovered_symbol, recovered_diff = covid19.get_symbol(recovered, "recovered")
+            url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
+            recovered = int(covid19.get_csv_crunch_total(url))
+            recovered_symbol, recovered_diff = covid19.get_symbol(recovered, "recovered")
 
-        percent_died = deaths / confirmed * 100
-        percent_died_round = str(round(percent_died, 2))
-        percent_died_round_symbol, percent_died_round_diff = covid19.get_symbol(
-            percent_died_round, "percent_died_round"
-        )
+            percent_died = deaths / confirmed * 100
+            percent_died_round = str(round(percent_died, 2))
+            percent_died_round_symbol, percent_died_round_diff = covid19.get_symbol(
+                percent_died_round, "percent_died_round"
+            )
 
-        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
-        if args.verbose:
-            print_banner(
-                "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}".format(
-                    dt_string, deaths, confirmed, recovered, percent_died_round
+            if args.verbose:
+                print_banner(
+                    "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}".format(
+                        dt_string, deaths, confirmed, recovered, percent_died_round
+                    )
+                )
+
+            print()
+            print(colored("({}) Covid19! Report:::  ".format(dt_string), "cyan"), end="")
+            print(
+                colored(
+                    "Confirmed({})({}): {},".format(
+                        confirmed_symbol, confirmed_diff, confirmed
+                    ),
+                    "blue",
+                ),
+                end="",
+            )
+            print(
+                colored(
+                    " Recovered({})({}): {},".format(
+                        recovered_symbol, recovered_diff, recovered
+                    ),
+                    "green",
+                ),
+                end="",
+            )
+            print(
+                colored(
+                    " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths), "red"
+                ),
+                end="",
+            )
+            print(
+                colored(
+                    " Percentage Died({})({}): {}".format(
+                        percent_died_round_symbol,
+                        percent_died_round_diff,
+                        percent_died_round,
+                    ),
+                    "magenta",
                 )
             )
+            print()
 
-        print()
-        print(colored("({}) Covid19! Report:::  ".format(dt_string), "cyan"), end="")
-        print(
-            colored(
-                "Confirmed({})({}): {},".format(
-                    confirmed_symbol, confirmed_diff, confirmed
-                ),
-                "blue",
-            ),
-            end="",
-        )
-        print(
-            colored(
-                " Recovered({})({}): {},".format(
-                    recovered_symbol, recovered_diff, recovered
-                ),
-                "green",
-            ),
-            end="",
-        )
-        print(
-            colored(
-                " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths), "red"
-            ),
-            end="",
-        )
-        print(
-            colored(
-                " Percentage Died({})({}): {}".format(
-                    percent_died_round_symbol,
-                    percent_died_round_diff,
-                    percent_died_round,
-                ),
-                "magenta",
-            )
-        )
-        print()
+            # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
+            # test = covid19.get_rest(url)
+            # print(test)
 
-        # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
-        # test = covid19.get_rest(url)
-        # print(test)
-
-    except Exception:
-        print("Exception caught:")
-        print(sys.exc_info())
-        raise
+        except Exception:
+            print("Exception caught:")
+            print(sys.exc_info())
+            raise
+        time.sleep(3600)
 
 
 if __name__ == "__main__":
