@@ -13,7 +13,7 @@ ofthe last known column, which is also the latest.
 
 ![Output looks like](./output_colored.png)
 
-Run until you quit or die of COVID19
+Run until you quit or die of COVID19 and become a number in the last column!
 
 To install:
 
