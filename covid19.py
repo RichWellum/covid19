@@ -106,37 +106,80 @@ class Covid19:
         self.previous_percentage = 0
 
     def get_symbol(self, now, handle):
-        """Calculate whether the number has increased or decreased."""
+        """Calculate whether the number has increased or decreased.
+
+        Provide a symbol showing direction of change.
+
+        Called each time for a different statistic so the handle is unique.
+        """
         # Calculate the difference and marker
         if handle == "deaths":
-            prev = self.previous_deaths
-        elif handle == "confirmed":
-            prev = self.previous_confirmed
-        elif handle == "recovered":
-            prev = self.previous_recovered
-        else:
-            prev = self.previous_percentage
+            if self.previous_deaths == 0 or self.previous_deaths == now:
+                # Nothing has changed or nothing recorded (loop started)
+                symbol = "<->"
+                diff = 0
+            elif now > self.previous_deaths:
+                # Number of deaths has increased
+                symbol = "^"
+                diff = "+{}".format(now - self.previous_deaths)
+                self.previous_deaths = now
+            else:
+                # Number of deaths has decreased (not possible)
+                symbol = "v"
+                diff = "-{}".format(self.previous_deaths - now)
+                # Store new previous deaths
+                self.previous_deaths = now
 
-        # Reset the previous values
-        if handle == "deaths":
-            self.previous_deaths = now
         elif handle == "confirmed":
-            self.previous_confirmed = now
-        elif handle == "recovered":
-            self.previous_recovered = now
-        else:
-            self.previous_percentage = now
+            if self.previous_confirmed == 0 or self.previous_confirmed == now:
+                # Nothing has changed or nothing recorded (loop started)
+                symbol = "<->"
+                diff = 0
+            elif now > self.previous_confirmed:
+                # Number of confirmed has increased
+                symbol = "^"
+                diff = "+{}".format(now - self.previous_confirmed)
+                self.previous_confirmed = now
+            else:
+                # Number of confirmed has decreased (not possible)
+                symbol = "v"
+                diff = "-{}".format(self.previous_confirmed - now)
+                # Store new previous confirmed
+                self.previous_confirmed = now
 
-        # Grab the symbol and diff
-        if prev == 0 or now == prev:
-            symbol = "<->"
-            diff = 0
-        elif now > prev:
-            symbol = "^"
-            diff = "+{}".format(now - prev)
-        else:
-            symbol = "v"
-            diff = "-{}".format(prev - now)
+        elif handle == "recovered":
+            if self.previous_recovered == 0 or self.previous_recovered == now:
+                # Nothing has changed or nothing recorded (loop started)
+                symbol = "<->"
+                diff = 0
+            elif now > self.previous_recovered:
+                # Number of recovered has increased
+                symbol = "^"
+                diff = "+{}".format(now - self.previous_recovered)
+                self.previous_recovered = now
+            else:
+                # Number of recovered has decreased (not possible?)
+                symbol = "v"
+                diff = "-{}".format(self.previous_recovered - now)
+                # Store new previous recovered
+                self.previous_recovered = now
+
+        else:  # percentage_deaths
+            if self.previous_percentage == 0 or self.previous_percentage == now:
+                # Nothing has changed or nothing recorded (loop started)
+                symbol = "<->"
+                diff = 0
+            elif now > self.previous_percentage:
+                # Number of percent_died_round has increased
+                symbol = "^"
+                diff = "+{}".format(now - self.previous_percentage)
+                self.previous_percentage = now
+            else:
+                # Number of percent_died_round has decreased
+                symbol = "v"
+                diff = "-{}".format(self.previous_percentage - now)
+                # Store new previous percent_died_round
+                self.previous_percentage = now
 
         return (symbol, diff)
 
@@ -194,11 +237,15 @@ def main():
 
             url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
             confirmed = int(covid19.get_csv_crunch_total(url))
-            confirmed_symbol, confirmed_diff = covid19.get_symbol(confirmed, "confirmed")
+            confirmed_symbol, confirmed_diff = covid19.get_symbol(
+                confirmed, "confirmed"
+            )
 
             url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
             recovered = int(covid19.get_csv_crunch_total(url))
-            recovered_symbol, recovered_diff = covid19.get_symbol(recovered, "recovered")
+            recovered_symbol, recovered_diff = covid19.get_symbol(
+                recovered, "recovered"
+            )
 
             percent_died = deaths / confirmed * 100
             percent_died_round = str(round(percent_died, 2))
@@ -216,7 +263,9 @@ def main():
                 )
 
             print()
-            print(colored("({}) Covid19! Report:::  ".format(dt_string), "cyan"), end="")
+            print(
+                colored("({}) Covid19! Report:::  ".format(dt_string), "cyan"), end=""
+            )
             print(
                 colored(
                     "Confirmed({})({}): {},".format(
@@ -237,7 +286,8 @@ def main():
             )
             print(
                 colored(
-                    " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths), "red"
+                    " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths),
+                    "red",
                 ),
                 end="",
             )
