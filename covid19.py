@@ -47,6 +47,12 @@ def parse_args():
         action="store_true",
         help="turn on verbose messages, commands and outputs",
     )
+    parser.add_argument(
+        "-s",
+        "--split",
+        action="store_true",
+        help="split the display to fit smaller terminals",
+    )
 
     return parser.parse_args()
 
@@ -251,10 +257,14 @@ def main():
 
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
+            # Print header
             print()
-            print(
-                colored("({}) Covid19!: ".format(dt_string), "cyan"), end=""
-            )
+            if args.split:
+                print(colored("({}) Covid19!: \n".format(dt_string), "cyan"))
+            else:
+                print(colored("({}) Covid19!: ".format(dt_string), "cyan"), end="")
+
+            # Print Confirmed
             print(
                 colored(
                     "Confirmed({})({}): {},".format(
@@ -264,6 +274,8 @@ def main():
                 ),
                 end="",
             )
+
+            # Print Recovered
             print(
                 colored(
                     " Recovered({})({}): {},".format(
@@ -273,6 +285,8 @@ def main():
                 ),
                 end="",
             )
+
+            # Print Deaths
             print(
                 colored(
                     " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths),
@@ -280,16 +294,31 @@ def main():
                 ),
                 end="",
             )
-            print(
-                colored(
-                    " Percentage Died({})({}): {}".format(
-                        percent_died_round_symbol,
-                        percent_died_round_diff,
-                        percent_died_round,
-                    ),
-                    "magenta",
+
+            # Print percentage died
+            if args.split:
+                print(
+                    colored(
+                        " % Died({})({}): {}".format(
+                            percent_died_round_symbol,
+                            percent_died_round_diff,
+                            percent_died_round,
+                        ),
+                        "magenta",
+                    )
                 )
-            )
+            else:
+                print(
+                    colored(
+                        " Percentage Died({})({}): {}".format(
+                            percent_died_round_symbol,
+                            percent_died_round_diff,
+                            percent_died_round,
+                        ),
+                        "magenta",
+                    )
+                )
+
             print()
 
             # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
