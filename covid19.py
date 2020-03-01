@@ -251,16 +251,9 @@ def main():
 
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
-            if args.verbose:
-                print_banner(
-                    "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}".format(
-                        dt_string, deaths, confirmed, recovered, percent_died_round
-                    )
-                )
-
             print()
             print(
-                colored("({}) Covid19! Report:::  ".format(dt_string), "cyan"), end=""
+                colored("({}) Covid19!: ".format(dt_string), "cyan"), end=""
             )
             print(
                 colored(
