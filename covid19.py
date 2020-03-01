@@ -122,13 +122,12 @@ class Covid19:
                 # Number of deaths has increased
                 symbol = "^"
                 diff = "+{}".format(now - self.previous_deaths)
-                self.previous_deaths = now
             else:
                 # Number of deaths has decreased (not possible)
                 symbol = "v"
                 diff = "-{}".format(self.previous_deaths - now)
                 # Store new previous deaths
-                self.previous_deaths = now
+            self.previous_deaths = now
 
         elif handle == "confirmed":
             if self.previous_confirmed == 0 or self.previous_confirmed == now:
@@ -139,13 +138,12 @@ class Covid19:
                 # Number of confirmed has increased
                 symbol = "^"
                 diff = "+{}".format(now - self.previous_confirmed)
-                self.previous_confirmed = now
             else:
                 # Number of confirmed has decreased (not possible)
                 symbol = "v"
                 diff = "-{}".format(self.previous_confirmed - now)
                 # Store new previous confirmed
-                self.previous_confirmed = now
+            self.previous_confirmed = now
 
         elif handle == "recovered":
             if self.previous_recovered == 0 or self.previous_recovered == now:
@@ -156,13 +154,12 @@ class Covid19:
                 # Number of recovered has increased
                 symbol = "^"
                 diff = "+{}".format(now - self.previous_recovered)
-                self.previous_recovered = now
             else:
                 # Number of recovered has decreased (not possible?)
                 symbol = "v"
                 diff = "-{}".format(self.previous_recovered - now)
                 # Store new previous recovered
-                self.previous_recovered = now
+            self.previous_recovered = now
 
         else:  # percentage_deaths
             if self.previous_percentage == 0 or self.previous_percentage == now:
@@ -173,13 +170,12 @@ class Covid19:
                 # Number of percent_died_round has increased
                 symbol = "^"
                 diff = "+{}".format(now - self.previous_percentage)
-                self.previous_percentage = now
             else:
                 # Number of percent_died_round has decreased
                 symbol = "v"
                 diff = "-{}".format(self.previous_percentage - now)
                 # Store new previous percent_died_round
-                self.previous_percentage = now
+            self.previous_percentage = now
 
         return (symbol, diff)
 
