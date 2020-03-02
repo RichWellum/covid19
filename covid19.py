@@ -340,11 +340,15 @@ def main():
                 covid_file.close()
 
             # Print header
+            test_str = ""
+            if args.test:
+                test_str = " (Test Data)"
+
             print()
             if args.split:
-                print(colored("({}) Covid19!: \n".format(dt_string), "cyan"))
+                print(colored("({}) Covid19!{}: \n".format(dt_string, test_str), "cyan"))
             else:
-                print(colored("({}) Covid19!: ".format(dt_string), "cyan"), end="")
+                print(colored("({}) Covid19!:{} ".format(dt_string, test_str), "cyan"), end="")
 
             # Print Confirmed
             print(
