@@ -344,11 +344,12 @@ def main():
             if args.test:
                 test_str = " (Test Data)"
 
+            interval_str = " {}s".format(args.interval)
             print()
             if args.split:
-                print(colored("({}) Covid19!{}: \n".format(dt_string, test_str), "cyan"))
+                print(colored("({}{}) Covid19!{}: \n".format(dt_string, interval_str, test_str), "cyan"))
             else:
-                print(colored("({}) Covid19!:{} ".format(dt_string, test_str), "cyan"), end="")
+                print(colored("({}{}) Covid19!:{} ".format(dt_string, interval_str, test_str), "cyan"), end="")
 
             # Print Confirmed
             print(
