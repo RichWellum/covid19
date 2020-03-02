@@ -19,6 +19,12 @@ from termcolor import colored
 from datetime import datetime
 import time
 
+# Globals used to save previous vaues when  a change occurs
+PREV_CONFIRMED = 0
+PREV_RECOVERED = 0
+PREV_DEATHS = 0
+PREV_PERCENTAGE = 0
+
 # use Colorama to make Termcolor work
 init(autoreset=True)
 
@@ -31,15 +37,32 @@ def parse_args():
     """Parse sys.argv and return args."""
     parser = argparse.ArgumentParser(
         formatter_class=RawDescriptionHelpFormatter,
-        description="Grab some COVID-19 datan",
-        epilog="E.g.: ./covid19",
+        description="Grab and process the latest COVID-19 data",
+        epilog="E.g.: ./covid19.py -i 600 -s",
     )
-
+    parser.add_argument(
+        "-i",
+        "--interval",
+        type=int, default='3600',
+        help="interval in seconds between retrieving the data again, default one hour(3600s)",
+    )
+    parser.add_argument(
+        "-r",
+        "--record",
+        action="store_true",
+        help="view a record of all changes",
+    )
+    parser.add_argument(
+        "-s",
+        "--split",
+        action="store_true",
+        help="split the display to fit smaller terminals",
+    )
     parser.add_argument(
         "-f",
         "--force",
         action="store_true",
-        help="Bypass safety rails - very dangerous",
+        help="bypass safety rails - very dangerous",
     )
     parser.add_argument(
         "-v",
@@ -48,10 +71,10 @@ def parse_args():
         help="turn on verbose messages, commands and outputs",
     )
     parser.add_argument(
-        "-s",
-        "--split",
+        "-t",
+        "--test",
         action="store_true",
-        help="split the display to fit smaller terminals",
+        help="run with a test file",
     )
 
     return parser.parse_args()
@@ -81,18 +104,94 @@ def print_banner(description):
     print("\n")
 
 
-def download_file(url):
-    """Download a url contents carefully."""
-    local_filename = url.split("/")[-1]
-    # NOTE the stream=True parameter below
-    with requests.get(url, stream=True) as req:
-        req.raise_for_status()
-        with open(local_filename, "wb") as file:
-            for chunk in req.iter_content(chunk_size=8192):
-                if chunk:  # filter out keep-alive new chunks
-                    file.write(chunk)
-                    # f.flush()
-    return local_filename
+def get_symbol(now, handle):
+    """Calculate whether the number has increased or decreased.
+
+    Provide a symbol showing direction of change, amount of change and whether
+    to store the change
+
+    Called each time for a different statistic so the handle is unique.
+    """
+    global PREV_CONFIRMED
+    global PREV_RECOVERED
+    global PREV_DEATHS
+    global PREV_PERCENTAGE
+
+    store_the_change = True
+
+    # Calculate the difference and marker
+    if handle == "deaths":
+        if PREV_DEATHS == 0 or PREV_DEATHS == now:
+            # Nothing has changed or nothing recorded (loop started)
+            symbol = "<->"
+            diff = 0
+            store_the_change = False
+        elif now > PREV_DEATHS:
+            # Number of deaths has increased
+            symbol = "^"
+            diff = "+{}".format(now - PREV_DEATHS)
+        else:
+            # Number of deaths has decreased (not possible)
+            symbol = "v"
+            diff = "-{}".format(PREV_DEATHS - now)
+            # Store new previous deaths
+        PREV_DEATHS = now
+
+    elif handle == "confirmed":
+        if PREV_CONFIRMED == 0 or PREV_CONFIRMED == now:
+            # Nothing has changed or nothing recorded (loop started)
+            symbol = "<->"
+            diff = 0
+            store_the_change = False
+        elif now > PREV_CONFIRMED:
+            # Number of confirmed has increased
+            symbol = "^"
+            diff = "+{}".format(now - PREV_CONFIRMED)
+        else:
+            # Number of confirmed has decreased (not possible)
+            symbol = "v"
+            diff = "-{}".format(PREV_CONFIRMED - now)
+            # Store new previous confirmed
+        PREV_CONFIRMED = now
+
+    elif handle == "recovered":
+        if PREV_RECOVERED == 0 or PREV_RECOVERED == now:
+            # Nothing has changed or nothing recorded (loop started)
+            symbol = "<->"
+            diff = 0
+            store_the_change = False
+        elif now > PREV_RECOVERED:
+            # Number of recovered has increased
+            symbol = "^"
+            diff = "+{}".format(now - PREV_RECOVERED)
+        else:
+            # Number of recovered has decreased (not possible?)
+            symbol = "v"
+            diff = "-{}".format(PREV_RECOVERED - now)
+            # Store new previous recovered
+        PREV_RECOVERED = now
+
+    else:  # percentage_deaths
+        now = round(now, 2)
+        if PREV_PERCENTAGE == 0 or PREV_PERCENTAGE == now:
+            # Nothing has changed or nothing recorded (loop started)
+            symbol = "<->"
+            diff = 0
+            store_the_change = False
+        elif now > PREV_PERCENTAGE:
+            # Number of percent_died_round has increased
+            symbol = "^"
+            diff = "+{}".format(now - PREV_PERCENTAGE)
+            diff = round(float(diff), 2)
+        else:
+            # Number of percent_died_round has decreased
+            symbol = "v"
+            diff = "-{}".format(PREV_PERCENTAGE - now)
+            diff = round(float(diff), 2)
+            # Store new previous percent_died_round
+        PREV_PERCENTAGE = now
+
+    return (symbol, diff, store_the_change)
 
 
 class Covid19:
@@ -106,84 +205,9 @@ class Covid19:
         """Initialize all variables from argparse if any."""
         self.force = args.force
         self.verbose = args.verbose
-        self.previous_confirmed = 0
-        self.previous_recovered = 0
-        self.previous_deaths = 0
-        self.previous_percentage = 0
-
-    def get_symbol(self, now, handle):
-        """Calculate whether the number has increased or decreased.
-
-        Provide a symbol showing direction of change.
-
-        Called each time for a different statistic so the handle is unique.
-        """
-        # Calculate the difference and marker
-        if handle == "deaths":
-            if self.previous_deaths == 0 or self.previous_deaths == now:
-                # Nothing has changed or nothing recorded (loop started)
-                symbol = "<->"
-                diff = 0
-            elif now > self.previous_deaths:
-                # Number of deaths has increased
-                symbol = "^"
-                diff = "+{}".format(now - self.previous_deaths)
-            else:
-                # Number of deaths has decreased (not possible)
-                symbol = "v"
-                diff = "-{}".format(self.previous_deaths - now)
-                # Store new previous deaths
-            self.previous_deaths = now
-
-        elif handle == "confirmed":
-            if self.previous_confirmed == 0 or self.previous_confirmed == now:
-                # Nothing has changed or nothing recorded (loop started)
-                symbol = "<->"
-                diff = 0
-            elif now > self.previous_confirmed:
-                # Number of confirmed has increased
-                symbol = "^"
-                diff = "+{}".format(now - self.previous_confirmed)
-            else:
-                # Number of confirmed has decreased (not possible)
-                symbol = "v"
-                diff = "-{}".format(self.previous_confirmed - now)
-                # Store new previous confirmed
-            self.previous_confirmed = now
-
-        elif handle == "recovered":
-            if self.previous_recovered == 0 or self.previous_recovered == now:
-                # Nothing has changed or nothing recorded (loop started)
-                symbol = "<->"
-                diff = 0
-            elif now > self.previous_recovered:
-                # Number of recovered has increased
-                symbol = "^"
-                diff = "+{}".format(now - self.previous_recovered)
-            else:
-                # Number of recovered has decreased (not possible?)
-                symbol = "v"
-                diff = "-{}".format(self.previous_recovered - now)
-                # Store new previous recovered
-            self.previous_recovered = now
-
-        else:  # percentage_deaths
-            if self.previous_percentage == 0 or self.previous_percentage == now:
-                # Nothing has changed or nothing recorded (loop started)
-                symbol = "<->"
-                diff = 0
-            elif now > self.previous_percentage:
-                # Number of percent_died_round has increased
-                symbol = "^"
-                diff = "+{}".format(now - self.previous_percentage)
-            else:
-                # Number of percent_died_round has decreased
-                symbol = "v"
-                diff = "-{}".format(self.previous_percentage - now)
-                # Store new previous percent_died_round
-            self.previous_percentage = now
-
-        return (symbol, diff)
+        self.record = args.record
+        self.test = args.test
+        self.interval = args.interval
 
     def get_rest(self, url):
         """Get the REST API and process the results."""
@@ -195,18 +219,50 @@ class Covid19:
             print(json_formatted_str)
         return response.json()
 
+    def display_record(self):
+        """Display contents of the history file.
+
+        Create it the first time.
+        """
+        if self.test:
+            return
+        history_file = "covid19_history.dat"
+        if not os.path.exists(history_file):
+            with open(history_file, 'w'):
+                pass
+
+        with open(history_file, 'r') as covid_file:
+            print(covid_file.read())
+
+    def download_file(self, url):
+        """Download a url contents carefully."""
+        if not self.test:
+            local_filename = url.split("/")[-1]
+            # NOTE the stream=True parameter below
+            with requests.get(url, stream=True) as req:
+                req.raise_for_status()
+                with open(local_filename, "wb") as file:
+                    for chunk in req.iter_content(chunk_size=8192):
+                        if chunk:  # filter out keep-alive new chunks
+                            file.write(chunk)
+                            # f.flush()
+            return local_filename
+        else:
+            return url
+
     def display_user_inputs(self):
         """Display all user inputs in a pretty way."""
         if not self.verbose:
             return
 
-        print_banner("Force = {}, Verbose = {}".format(self.force, self.verbose,))
+        print_banner("Force = {}, Verbose = {}, History = {}, Test = {}, Interval = {}".format(self.force, self.verbose, self.record, self.test, self.interval))
 
     def get_csv_crunch_total(self, url):
         """Grab all the confirmed cases."""
-        file = download_file(url)
+        file = self.download_file(url)
         df_pandas = pd.read_csv(file)
-        os.remove(file)
+        if not self.test:
+            os.remove(file)
 
         if self.verbose:
             print(df_pandas)
@@ -230,32 +286,46 @@ def main():
             covid19 = Covid19(args)
             covid19.display_user_inputs()
 
+            if args.record:
+                covid19.display_record()
+                sys.exit()
+
             # datetime object containing current date and time
             now = datetime.now()
 
-            url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+            if args.test:
+                url = "Test_Data/Deaths.csv"
+            else:
+                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
             deaths = int(covid19.get_csv_crunch_total(url))
-            deaths_symbol, deaths_diff = covid19.get_symbol(deaths, "deaths")
+            deaths_symbol, deaths_diff, death_store = get_symbol(deaths, "deaths")
 
-            url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+            if args.test:
+                url = "Test_Data/Confirmed.csv"
+            else:
+                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
             confirmed = int(covid19.get_csv_crunch_total(url))
-            confirmed_symbol, confirmed_diff = covid19.get_symbol(
-                confirmed, "confirmed"
-            )
+            confirmed_symbol, confirmed_diff, confirmed_store = get_symbol(confirmed, "confirmed")
 
-            url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
+            if args.test:
+                url = "Test_Data/Recovered.csv"
+            else:
+                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
             recovered = int(covid19.get_csv_crunch_total(url))
-            recovered_symbol, recovered_diff = covid19.get_symbol(
-                recovered, "recovered"
-            )
+            recovered_symbol, recovered_diff, recovered_store = get_symbol(recovered, "recovered")
 
             percent_died = deaths / confirmed * 100
-            percent_died_round = str(round(percent_died, 2))
-            percent_died_round_symbol, percent_died_round_diff = covid19.get_symbol(
-                percent_died_round, "percent_died_round"
-            )
+            percent_died_symbol, percent_died_diff, percentage_died_store = get_symbol(percent_died, "percent_died_round")
 
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
+            # If any change store in a file for historical purposes
+            if (death_store or confirmed_store or recovered_store or percentage_died_store) and not args.test:
+                covid_file = open('covid19_history.dat', 'a+')
+                covid_file.write(
+                    "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}\n".format(
+                        dt_string, deaths, confirmed, recovered, round(percent_died, 2)))
+                covid_file.close()
 
             # Print header
             print()
@@ -300,10 +370,9 @@ def main():
                 print(
                     colored(
                         " % Died({})({}): {}".format(
-                            percent_died_round_symbol,
-                            percent_died_round_diff,
-                            percent_died_round,
-                        ),
+                            percent_died_symbol,
+                            percent_died_diff,
+                            round(percent_died, 2)),
                         "magenta",
                     )
                 )
@@ -311,9 +380,9 @@ def main():
                 print(
                     colored(
                         " Percentage Died({})({}): {}".format(
-                            percent_died_round_symbol,
-                            percent_died_round_diff,
-                            percent_died_round,
+                            percent_died_symbol,
+                            percent_died_diff,
+                            round(percent_died, 2),
                         ),
                         "magenta",
                     )
@@ -329,7 +398,7 @@ def main():
             print("Exception caught:")
             print(sys.exc_info())
             raise
-        time.sleep(3600)
+        time.sleep(args.interval)
 
 
 if __name__ == "__main__":
