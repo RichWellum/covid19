@@ -43,14 +43,12 @@ def parse_args():
     parser.add_argument(
         "-i",
         "--interval",
-        type=int, default='3600',
+        type=int,
+        default="3600",
         help="interval in seconds between retrieving the data again, default one hour(3600s)",
     )
     parser.add_argument(
-        "-r",
-        "--record",
-        action="store_true",
-        help="view a record of all changes",
+        "-r", "--record", action="store_true", help="view a record of all changes",
     )
     parser.add_argument(
         "-s",
@@ -71,10 +69,7 @@ def parse_args():
         help="turn on verbose messages, commands and outputs",
     )
     parser.add_argument(
-        "-t",
-        "--test",
-        action="store_true",
-        help="run with a test file",
+        "-t", "--test", action="store_true", help="run with a test file",
     )
 
     return parser.parse_args()
@@ -228,10 +223,10 @@ class Covid19:
             return
         history_file = "covid19_history.dat"
         if not os.path.exists(history_file):
-            with open(history_file, 'w'):
+            with open(history_file, "w"):
                 pass
         print_banner("Historical Data:")
-        with open(history_file, 'r') as covid_file:
+        with open(history_file, "r") as covid_file:
             print(covid_file.read())
 
     def download_file(self, url):
@@ -255,7 +250,11 @@ class Covid19:
         if not self.verbose:
             return
 
-        print_banner("Force = {}, Verbose = {}, History = {}, Test = {}, Interval = {}".format(self.force, self.verbose, self.record, self.test, self.interval))
+        print_banner(
+            "Force = {}, Verbose = {}, History = {}, Test = {}, Interval = {}".format(
+                self.force, self.verbose, self.record, self.test, self.interval
+            )
+        )
 
     def get_csv_crunch_total(self, url):
         """Grab all the confirmed cases."""
@@ -305,26 +304,39 @@ def main():
             else:
                 url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
             confirmed = int(covid19.get_csv_crunch_total(url))
-            confirmed_symbol, confirmed_diff, confirmed_store = get_symbol(confirmed, "confirmed")
+            confirmed_symbol, confirmed_diff, confirmed_store = get_symbol(
+                confirmed, "confirmed"
+            )
 
             if args.test:
                 url = "Test_Data/Recovered.csv"
             else:
                 url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
             recovered = int(covid19.get_csv_crunch_total(url))
-            recovered_symbol, recovered_diff, recovered_store = get_symbol(recovered, "recovered")
+            recovered_symbol, recovered_diff, recovered_store = get_symbol(
+                recovered, "recovered"
+            )
 
             percent_died = deaths / confirmed * 100
-            percent_died_symbol, percent_died_diff, percentage_died_store = get_symbol(percent_died, "percent_died_round")
+            percent_died_symbol, percent_died_diff, percentage_died_store = get_symbol(
+                percent_died, "percent_died_round"
+            )
 
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
             # If any change store in a file for historical purposes
-            if (death_store or confirmed_store or recovered_store or percentage_died_store) and not args.test:
-                covid_file = open('covid19_history.dat', 'a+')
+            if (
+                death_store
+                or confirmed_store
+                or recovered_store
+                or percentage_died_store
+            ) and not args.test:
+                covid_file = open("covid19_history.dat", "a+")
                 covid_file.write(
                     "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}\n".format(
-                        dt_string, deaths, confirmed, recovered, round(percent_died, 2)))
+                        dt_string, deaths, confirmed, recovered, round(percent_died, 2)
+                    )
+                )
                 covid_file.close()
 
             # Print header
@@ -372,7 +384,8 @@ def main():
                         " % Died({})({}): {}".format(
                             percent_died_symbol,
                             percent_died_diff,
-                            round(percent_died, 2)),
+                            round(percent_died, 2),
+                        ),
                         "magenta",
                     )
                 )
