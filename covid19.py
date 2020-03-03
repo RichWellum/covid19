@@ -230,9 +230,14 @@ class Covid19:
         if self.test:
             return
         history_file = "covid19_history.dat"
+        # Create the file if it's the first time and it doesn't exist
         if not os.path.exists(history_file):
             with open(history_file, "w"):
                 pass
+        # Printing an empty file is boring
+        if os.stat(history_file).st_size == 0:
+            return
+        # Print the current stats
         with open(history_file, "r") as covid_file:
             print(covid_file.read())
 
@@ -343,8 +348,8 @@ def main():
             ) and not args.test:
                 covid_file = open("covid19_history.dat", "a+")
                 covid_file.write(
-                    "COVID19 Report({}):: Confirmed: {}, Recovered: {}, Deaths: {}, Percent_Died: {}\n".format(
-                        dt_string, confirmed, recovered, deaths, round(percent_died, 2)
+                    "COVID19 Report({}):: Confirmed({})({}): {}, Recovered({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
+                        dt_string, confirmed_symbol, confirmed_diff, confirmed, recovered_symbol, recovered_diff, recovered, deaths_symbol, deaths_diff, deaths, percent_died_symbol, percent_died_diff, round(percent_died, 2)
                     )
                 )
                 covid_file.close()
