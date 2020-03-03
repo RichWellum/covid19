@@ -340,16 +340,23 @@ def main():
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
             # If any change store in a file for historical purposes
-            if (
-                death_store
-                or confirmed_store
-                or recovered_store
-                or percentage_died_store
-            ) and not args.test:
+            if (death_store or confirmed_store or recovered_store or percentage_died_store) and not args.test:
                 covid_file = open("covid19_history.dat", "a+")
                 covid_file.write(
                     "COVID19 Report({}):: Confirmed({})({}): {}, Recovered({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
-                        dt_string, confirmed_symbol, confirmed_diff, confirmed, recovered_symbol, recovered_diff, recovered, deaths_symbol, deaths_diff, deaths, percent_died_symbol, percent_died_diff, round(percent_died, 2)
+                        dt_string,
+                        confirmed_symbol,
+                        confirmed_diff,
+                        confirmed,
+                        recovered_symbol,
+                        recovered_diff,
+                        recovered,
+                        deaths_symbol,
+                        deaths_diff,
+                        deaths,
+                        percent_died_symbol,
+                        percent_died_diff,
+                        round(percent_died, 2),
                     )
                 )
                 covid_file.close()
@@ -362,9 +369,22 @@ def main():
             interval_str = " {}s".format(args.interval)
             print()
             if args.split:
-                print(colored("({}{}) Covid19!{}: \n".format(dt_string, interval_str, test_str), "cyan"))
+                print(
+                    colored(
+                        "({}{}) Covid19!{}: \n".format(
+                            dt_string, interval_str, test_str
+                        ),
+                        "cyan",
+                    )
+                )
             else:
-                print(colored("({}{}) Covid19!:{} ".format(dt_string, interval_str, test_str), "cyan"), end="")
+                print(
+                    colored(
+                        "({}{}) Covid19!:{} ".format(dt_string, interval_str, test_str),
+                        "cyan",
+                    ),
+                    end="",
+                )
 
             # Print Confirmed
             print(
