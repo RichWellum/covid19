@@ -343,8 +343,8 @@ def main():
             ) and not args.test:
                 covid_file = open("covid19_history.dat", "a+")
                 covid_file.write(
-                    "COVID19 Report({}):: deaths: {}, confirmed: {}, recovered: {}, percent_died: {}\n".format(
-                        dt_string, deaths, confirmed, recovered, round(percent_died, 2)
+                    "COVID19 Report({}):: Confirmed: {}, Recovered: {}, Deaths: {}, Percent_Died: {}\n".format(
+                        dt_string, confirmed, recovered, deaths, round(percent_died, 2)
                     )
                 )
                 covid_file.close()
