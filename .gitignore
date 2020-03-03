@@ -133,3 +133,5 @@ settings.json
 
 # Covid
 Test_Data/
+
+.DS_store

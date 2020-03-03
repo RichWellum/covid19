@@ -1,9 +1,14 @@
 #!/usr/local/bin/python3
-"""Grab some info about covid19.
+"""Display information about COVID19.
+
+Runs on a loop checking the number of Confirmed, Recovered and Deaths and also
+the percentage died.
 
 All data pulled from: https://github.com/CSSEGISandData/COVID-19
 
-Recommend doing: 'watch -d ./covid19.py'
+User can specify the interval to check, the type of display (for small
+displays), and display the record of any changes. In addition there's a test
+option which allows you to enter your own data files, or make modifications.
 """
 
 import argparse
@@ -48,7 +53,10 @@ def parse_args():
         help="interval in seconds between retrieving the data again, default one hour(3600s)",
     )
     parser.add_argument(
-        "-r", "--record", action="store_true", help="view a record of all changes",
+        "-r",
+        "--record",
+        action="store_true",
+        help="view a record of all changes in a continuously running loop",
     )
     parser.add_argument(
         "-s",
@@ -285,9 +293,11 @@ def main():
             covid19 = Covid19(args)
             covid19.display_user_inputs()
 
+            # Purely view the statistics on a running loop
             if args.record:
-                covid19.display_record()
-                sys.exit()
+                while True:
+                    covid19.display_record()
+                    time.sleep(60)
 
             # datetime object containing current date and time
             now = datetime.now()
