@@ -233,7 +233,6 @@ class Covid19:
         if not os.path.exists(history_file):
             with open(history_file, "w"):
                 pass
-        print_banner("Historical Data:")
         with open(history_file, "r") as covid_file:
             print(covid_file.read())
 
@@ -295,6 +294,7 @@ def main():
 
             # Purely view the statistics on a running loop
             if args.record:
+                print_banner("Historical Data, one minute loop:")
                 while True:
                     covid19.display_record()
                     time.sleep(60)
