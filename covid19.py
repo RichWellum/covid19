@@ -299,10 +299,10 @@ def main():
 
             # Purely view the statistics on a running loop
             if args.record:
-                print_banner("Historical Data, one minute loop:")
                 while True:
+                    print_banner("Historical Data, one minute loop:")
                     covid19.display_record()
-                    time.sleep(60)
+                    time.sleep(350) # Sleep 5m
 
             # datetime object containing current date and time
             now = datetime.now()
