@@ -300,7 +300,7 @@ def main():
             # Purely view the statistics on a running loop
             if args.record:
                 while True:
-                    print_banner("Historical Data, one minute loop:")
+                    print_banner("Historical Data, five minute loop:")
                     covid19.display_record()
                     time.sleep(350) # Sleep 5m
 
