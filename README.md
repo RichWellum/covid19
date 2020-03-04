@@ -1,4 +1,4 @@
-# covid19
+# covid19_counter
 
 Simple but somewhat morbid tool to display information about COVID19.
 
@@ -15,9 +15,15 @@ Data on Deaths, Confirmed cases, Recoveries and Percentage Died are calculated
 by pulling the CSV files down, and creating pandas df's, summing the data up
 ofthe last known column, which is also the latest.
 
+In a seperate terminal the user can see a running history of changes:
+
 ![Output looks like](./covid_output.png)
 
-To install on a Mac:
+```bash
+    covid19_counter -r
+```
+
+To install on a Mac directly from github clone:
 
 ```bash
     cd covid19 # cd to the directory
@@ -33,10 +39,17 @@ termcolor, requests:
     pip3 install pandas colorama termcolor requests
 ```
 
+Or install from pypi:
+
+```bash
+    pip3 install covid19-counter-pkg-richwellum==0.0.2
+    covid19_counter
+```
+
 Example running:
 
 ```bash
-    RWELLUM-M-C5JH:covid19 rwellum$ ./covid19.py -i 400 -h
+    RWELLUM-M-C5JH:covid19 rwellum$ covid19_counter -i 400 -h
     usage: covid19.py [-h] [-i INTERVAL] [-r] [-s] [-f] [-v] [-t]
 
     Grab and process the latest COVID-19 data

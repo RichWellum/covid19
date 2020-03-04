@@ -43,7 +43,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=RawDescriptionHelpFormatter,
         description="Grab and process the latest COVID-19 data",
-        epilog="E.g.: ./covid19.py -i 600 -s",
+        epilog="E.g.: covid19_counter -i 600 -s",
     )
     parser.add_argument(
         "-i",
