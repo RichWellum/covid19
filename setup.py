@@ -1,16 +1,16 @@
 import setuptools
 
 with open("README.md", "r") as fh:
-    long_description = fh.read()
+    LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
     name="covid19-counter_pkg-richwellum",
-    version="0.0.3",
+    version="0.0.4",
     scripts=['covid19_counter'],
     author="Richard Wellum",
     author_email="richwellum@gmail.com",
     description="Track some basic covid19 statistics",
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/RichWellum/covid19",
     packages=setuptools.find_packages(),
