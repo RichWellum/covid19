@@ -184,8 +184,8 @@ def get_symbol(now, handle):
         elif now > PREV_PERCENTAGE:
             # Number of percent_died_round has increased
             symbol = "^"
-            diff = "+{}".format(now - PREV_PERCENTAGE)
-            diff = round(float(diff), 2)
+            diff = round(float(now - PREV_PERCENTAGE), 2)
+            diff = "+{}".format(diff)
         else:
             # Number of percent_died_round has decreased
             symbol = "v"
