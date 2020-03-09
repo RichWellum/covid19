@@ -15,14 +15,17 @@ import argparse
 import json
 import os
 import sys
+import time
 from argparse import RawDescriptionHelpFormatter
+from datetime import datetime
 
 import pandas as pd
 import requests
 from colorama import init
 from termcolor import colored
-from datetime import datetime
-import time
+from twython import Twython
+from auth import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from pathlib import Path
 
 # Globals used to save previous vaues when  a change occurs
 PREV_CONFIRMED = 0
@@ -32,6 +35,9 @@ PREV_PERCENTAGE = 0
 
 # use Colorama to make Termcolor work
 init(autoreset=True)
+
+HOME = str(Path.home())
+HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
 
 
 class AbortScriptException(Exception):
@@ -63,6 +69,18 @@ def parse_args():
         "--split",
         action="store_true",
         help="split the display to fit smaller terminals",
+    )
+    parser.add_argument(
+        "-w",
+        "--tweet",
+        action="store_true",
+        help="Experimental: Send tweets on data changes, needs developer account",
+    )
+    parser.add_argument(
+        "-wf",
+        "--tweet_force",
+        action="store_true",
+        help="Experimental: Sent a one-time tweet with current status, needs developer account",
     )
     parser.add_argument(
         "-f",
@@ -229,16 +247,16 @@ class Covid19:
         """
         if self.test:
             return
-        history_file = "covid19_history.dat"
+
         # Create the file if it's the first time and it doesn't exist
-        if not os.path.exists(history_file):
-            with open(history_file, "w"):
+        if not os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, "w"):
                 pass
         # Printing an empty file is boring
-        if os.stat(history_file).st_size == 0:
+        if os.stat(HISTORY_FILE).st_size == 0:
             return
         # Print the current stats
-        with open(history_file, "r") as covid_file:
+        with open(HISTORY_FILE, "r") as covid_file:
             print(covid_file.read())
 
     def download_file(self, url):
@@ -300,9 +318,10 @@ def main():
             # Purely view the statistics on a running loop
             if args.record:
                 while True:
-                    print_banner("Historical Data, five minute loop:")
+                    print_banner("Historical Data {}, five minute loop:".format(HISTORY_FILE))
                     covid19.display_record()
-                    time.sleep(350) # Sleep 5m
+                    time.sleep(350)  # Sleep 5m
+                    print(chr(27) + "[2J")
 
             # datetime object containing current date and time
             now = datetime.now()
@@ -338,28 +357,54 @@ def main():
             )
 
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            message = "COVID19 Report({}):: Confirmed({})({}): {}, Recovered({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
+                dt_string,
+                confirmed_symbol,
+                confirmed_diff,
+                confirmed,
+                recovered_symbol,
+                recovered_diff,
+                recovered,
+                deaths_symbol,
+                deaths_diff,
+                deaths,
+                percent_died_symbol,
+                percent_died_diff,
+                round(percent_died, 2),
+            )
 
-            # If any change store in a file for historical purposes
-            if (death_store or confirmed_store or recovered_store or percentage_died_store) and not args.test:
-                covid_file = open("covid19_history.dat", "a+")
-                covid_file.write(
-                    "COVID19 Report({}):: Confirmed({})({}): {}, Recovered({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
-                        dt_string,
-                        confirmed_symbol,
-                        confirmed_diff,
-                        confirmed,
-                        recovered_symbol,
-                        recovered_diff,
-                        recovered,
-                        deaths_symbol,
-                        deaths_diff,
-                        deaths,
-                        percent_died_symbol,
-                        percent_died_diff,
-                        round(percent_died, 2),
-                    )
+            # One time tweet of the latest data
+            if args.tweet_force:
+                tweet_hash_tags = "#covid19 #coronavirus"
+                tweet_message = "{} {}".format(message, tweet_hash_tags)
+                twitter = Twython(
+                    CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
                 )
+                twitter.update_status(status=tweet_message)
+                print("Tweeted: {}".format(tweet_message))
+
+            # If any change store in a file for historical purposes, and sent tweet
+            if (
+                death_store
+                or confirmed_store
+                or recovered_store
+                or percentage_died_store
+            ) and not args.test:
+
+                # Update log file
+                covid_file = open("covid19_history.dat", "a+")
+                covid_file.write(message)
                 covid_file.close()
+
+                # If twitter alerts enable send tweet
+                if args.tweet:
+                    tweet_hash_tags = "#covid19 #coronavirus"
+                    tweet_message = "{} {}".format(message, tweet_hash_tags)
+                    twitter = Twython(
+                        CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+                    )
+                    twitter.update_status(status=tweet_message)
+                    print("Tweeted: {}".format(tweet_message))
 
             # Print header
             test_str = ""
@@ -442,6 +487,9 @@ def main():
                 )
 
             print()
+
+            if args.tweet_force:
+                sys.exit()
 
             # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
             # test = covid19.get_rest(url)

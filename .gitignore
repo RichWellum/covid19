@@ -130,8 +130,14 @@ dmypy.json
 
 # vscode
 settings.json
+.DS_store
 
 # Covid
 Test_Data/
+Test_Data/*
 
-.DS_store
+# Don't commit this as it contains private keys
+#auth.py
+
+# History file is personal too
+covid19_history.dat

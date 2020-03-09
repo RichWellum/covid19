@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="covid19-counter_pkg-richwellum",
-    version="0.0.4",
+    version="0.0.5",
     scripts=['covid19_counter'],
     author="Richard Wellum",
     author_email="richwellum@gmail.com",
@@ -15,7 +15,7 @@ setuptools.setup(
     url="https://github.com/RichWellum/covid19",
     packages=setuptools.find_packages(),
     install_requires=[
-        'pandas', 'requests', 'colorama', 'termcolor',
+        'pandas', 'requests', 'colorama', 'termcolor', 'twython',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
