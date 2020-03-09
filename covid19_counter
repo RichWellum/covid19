@@ -38,6 +38,7 @@ init(autoreset=True)
 
 HOME = str(Path.home())
 HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
+TWEET_HASH_TAGS = "#covid19 #coronavirus #COVID2019 #WuhanVirus"
 
 
 class AbortScriptException(Exception):
@@ -375,8 +376,7 @@ def main():
 
             # One time tweet of the latest data
             if args.tweet_force:
-                tweet_hash_tags = "#covid19 #coronavirus #WuhanVirus"
-                tweet_message = "{} {}".format(message, tweet_hash_tags)
+                tweet_message = "{} {}".format(message, TWEET_HASH_TAGS)
                 twitter = Twython(
                     CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
                 )
@@ -398,8 +398,7 @@ def main():
 
                 # If twitter alerts enable send tweet
                 if args.tweet:
-                    tweet_hash_tags = "#covid19 #coronavirus #COVID2019 #WuhanVirus"
-                    tweet_message = "{} {}".format(message, tweet_hash_tags)
+                    tweet_message = "{} {}".format(message, TWEET_HASH_TAGS)
                     twitter = Twython(
                         CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
                     )
