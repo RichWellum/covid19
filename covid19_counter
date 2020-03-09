@@ -375,7 +375,7 @@ def main():
 
             # One time tweet of the latest data
             if args.tweet_force:
-                tweet_hash_tags = "#covid19 #coronavirus"
+                tweet_hash_tags = "#covid19 #coronavirus #WuhanVirus"
                 tweet_message = "{} {}".format(message, tweet_hash_tags)
                 twitter = Twython(
                     CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
