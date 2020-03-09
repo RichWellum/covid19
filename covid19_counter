@@ -398,7 +398,7 @@ def main():
 
                 # If twitter alerts enable send tweet
                 if args.tweet:
-                    tweet_hash_tags = "#covid19 #coronavirus"
+                    tweet_hash_tags = "#covid19 #coronavirus #COVID2019 #WuhanVirus"
                     tweet_message = "{} {}".format(message, tweet_hash_tags)
                     twitter = Twython(
                         CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
