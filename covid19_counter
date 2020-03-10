@@ -18,22 +18,24 @@ import sys
 import time
 from argparse import RawDescriptionHelpFormatter
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import requests
 from colorama import init
 from termcolor import colored
 from twython import Twython
-from auth import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-from pathlib import Path
 
-# Globals used to save previous vaues when  a change occurs
+from auth import (ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY,
+                  CONSUMER_SECRET)
+
+# Globals used to save previous vaues when a change occurs
 PREV_CONFIRMED = 0
 PREV_RECOVERED = 0
 PREV_DEATHS = 0
 PREV_PERCENTAGE = 0
 
-# use Colorama to make Termcolor work
+# Use Colorama to make Termcolor work
 init(autoreset=True)
 
 HOME = str(Path.home())
@@ -383,7 +385,8 @@ def main():
                 twitter.update_status(status=tweet_message)
                 print("Tweeted: {}".format(tweet_message))
 
-            # If any change store in a file for historical purposes, and sent tweet
+            # If any change store in a file for historical purposes
+            # and send tweet if requested
             if (
                 death_store
                 or confirmed_store
@@ -490,10 +493,6 @@ def main():
 
             if args.tweet_force:
                 sys.exit()
-
-            # url = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/PoolPermits/FeatureServer/query?layerDefs={'0':'Has_Pool=1 AND Pool_Permit=1','1':'Has_Pool=1 AND Pool_Permit=1'}&returnGeometry=true&f=html"
-            # test = covid19.get_rest(url)
-            # print(test)
 
         except Exception:
             print("Exception caught:")
