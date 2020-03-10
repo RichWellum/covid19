@@ -392,9 +392,10 @@ def main():
             ) and not args.test:
 
                 # Update log file
-                covid_file = open("covid19_history.dat", "a+")
+                covid_file = open(HISTORY_FILE, "a+")
                 covid_file.write(message)
                 covid_file.close()
+                print("Recorded: {}: '{}'".format(covid_file, message))
 
                 # If twitter alerts enable send tweet
                 if args.tweet:
