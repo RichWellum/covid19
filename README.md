@@ -15,6 +15,11 @@ Data on Deaths, Confirmed cases, Recoveries and Percentage Died are calculated
 by pulling the CSV files down, and creating pandas df's, summing the data up
 ofthe last known column, which is also the latest.
 
+Option to Tweet the results - obviously requires a Twitter developer license
+and creds populated in an auth.py file.
+
+This is currently active: <https://twitter.com/alert_covid19>
+
 In a seperate terminal the user can see a running history of changes:
 
 ![Output looks like](./covid_output.png)
@@ -25,24 +30,18 @@ In a seperate terminal the user can see a running history of changes:
 
 To install on a Mac directly from github clone:
 
-```bash
-    cd covid19 # cd to the directory
-    brew install pipenv
-    pipenv install # Seems temperamental - so use manual steps below if needed
-```
-
-Otherwise you need python3 and the packages (pip3 install): pandas, colorama,
-termcolor, requests:
+Needed: python3 and the packages (pip3 install): pandas, colorama, termcolor,
+requests twython:
 
 ```bash
     brew install python3  #(or sudo apt install python3 etc)
-    pip3 install pandas colorama termcolor requests
+    pip3 install pandas colorama termcolor requests twython
 ```
 
 Or install from pypi:
 
 ```bash
-    pip3 install covid19-counter-pkg-richwellum==0.0.2
+    pip3 install covid19-counter-pkg-richwellum==<version>
     covid19_counter
 ```
 
