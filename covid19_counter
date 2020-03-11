@@ -26,8 +26,7 @@ from colorama import init
 from termcolor import colored
 from twython import Twython
 
-from auth import (ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY,
-                  CONSUMER_SECRET)
+from auth import ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
 # Globals used to save previous vaues when a change occurs
 PREV_CONFIRMED = 0
@@ -40,7 +39,11 @@ init(autoreset=True)
 
 HOME = str(Path.home())
 HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
-TWEET_HASH_TAGS = "#covid19 #coronavirus #COVID2019 #WuhanVirus"
+TWEET_HASH_TAGS = (
+    "#covid19 #coronavirus #COVID2019 #COVID #Coronavid19 #Corona "
+    "#CoronavirusOutbreak #Covid_19 #pandemia #KeepCalm #StopCoronaVirus "
+    "#CoronaVirus #pandemic #PandemicPreparedness #CoronaVirusUpdate #flatteningthecurve"
+)
 
 
 class AbortScriptException(Exception):
@@ -321,7 +324,9 @@ def main():
             # Purely view the statistics on a running loop
             if args.record:
                 while True:
-                    print_banner("Historical Data {}, five minute loop:".format(HISTORY_FILE))
+                    print_banner(
+                        "Historical Data {}, five minute loop:".format(HISTORY_FILE)
+                    )
                     covid19.display_record()
                     time.sleep(350)  # Sleep 5m
                     print(chr(27) + "[2J")
@@ -396,7 +401,7 @@ def main():
 
                 # Update log file
                 covid_file = open(HISTORY_FILE, "a+")
-                covid_file.write(message)
+                covid_file.write(message + "\n")
                 covid_file.close()
                 print("Recorded: {}: '{}'".format(covid_file, message))
 
