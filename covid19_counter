@@ -401,7 +401,7 @@ def main():
 
                 # Update log file
                 covid_file = open(HISTORY_FILE, "a+")
-                covid_file.write(message + "\n")
+                covid_file.write(message)
                 covid_file.close()
                 print("Recorded: {}: '{}'".format(covid_file, message))
 
