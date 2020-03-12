@@ -42,7 +42,7 @@ HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
 TWEET_HASH_TAGS = (
     "#covid19 #coronavirus #COVID2019 #COVID #Coronavid19 #Corona "
     "#Covid_19 #pandemia #KeepCalm #StopCoronaVirus "
-    "#CoronaVirus #pandemic #CoronaVirusUpdate #flatteningthecurve"
+    "#CoronaVirus #pandemic #CoronaVirusUpdate"
 )
 
 
