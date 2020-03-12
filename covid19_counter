@@ -263,7 +263,7 @@ class Covid19:
             return
         # Print the current stats
         with open(HISTORY_FILE, "r") as covid_file:
-            print(covid_file.read())
+            print(colored(covid_file.read(), "red", "on_grey", ["bold"]))
 
     def download_file(self, url):
         """Download a url contents carefully."""
