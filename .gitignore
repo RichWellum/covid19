@@ -132,10 +132,6 @@ dmypy.json
 settings.json
 .DS_store
 
-# Covid
-Test_Data/
-Test_Data/*
-
 # Don't commit this as it contains private keys
 #auth.py
 
