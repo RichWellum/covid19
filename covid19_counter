@@ -469,7 +469,7 @@ def main():
 
             # Data can't be zero - or something has gone wrong - so print an
             # error instead. Will not store or tweet either (unless forced)
-            if not (confirmed_diff == 0 or recovered_diff == 0 or deaths_diff == 0):
+            if not (confirmed == 0 or recovered == 0 or deaths == 0):
                 # Set sleep interval to the default or inputted
                 sleep_interval = args.interval
 
