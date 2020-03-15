@@ -528,8 +528,13 @@ def main():
                 print()
             else:
                 print(
-                    "Error: data issue - confirmed {}, recovered {}, deaths {}".format(
-                        confirmed, recovered, deaths
+                    colored(
+                        "Error: data issue - Confirmed {}, Recovered {}, Deaths {}".format(
+                            confirmed, recovered, deaths
+                        ),
+                        "red",
+                        "on_white",
+                        ["bold", "blink"],
                     )
                 )
 
