@@ -342,6 +342,7 @@ class Covid19:
 def main():
     """Call everything."""
     args = parse_args()
+    sleep_interval = args.interval
 
     while True:
         try:
@@ -446,7 +447,7 @@ def main():
             if args.test:
                 test_str = " (Test Data)"
 
-            interval_str = " {}s".format(args.interval)
+            interval_str = " {}s".format(sleep_interval)
             print()
             if args.compact:
                 print(
@@ -469,6 +470,9 @@ def main():
             # Data can't be zero - or something has gone wrong - so print an
             # error instead. Will not store or tweet either (unless forced)
             if not (confirmed_diff == 0 or recovered_diff == 0 or deaths_diff == 0):
+                # Set sleep interval to the default or inputted
+                sleep_interval = args.interval
+
                 # Print Confirmed
                 print(
                     colored(
@@ -527,6 +531,8 @@ def main():
                     )
                 print()
             else:
+                # Under error condition, speed up checking for data to heal quicker
+                sleep_interval = 60
                 print(
                     colored(
                         "Error: data issue - Confirmed {}, Recovered {}, Deaths {}".format(
@@ -545,7 +551,7 @@ def main():
             print("Exception caught:")
             print(sys.exc_info())
             raise
-        time.sleep(args.interval)
+        time.sleep(sleep_interval)
 
 
 if __name__ == "__main__":
