@@ -6,9 +6,16 @@ the percentage died.
 
 All data pulled from: https://github.com/CSSEGISandData/COVID-19
 
+This data is used by the John Hopkins website, but should be noted that it
+updates very slowly and has a lot of issues open complaining about the accuracy
+of the data.
+
 User can specify the interval to check, the type of display (for small
-displays), and display the record of any changes. In addition there's a test
-option which allows you to enter your own data files, or make modifications.
+displays), and display the record of any changes. The user can request a tweet
+on data change or force a tweet if needed.
+
+In addition there's a test option which allows you to enter your own data
+files, or make modifications.
 """
 
 import argparse
@@ -56,8 +63,8 @@ def parse_args():
     """Parse sys.argv and return args."""
     parser = argparse.ArgumentParser(
         formatter_class=RawDescriptionHelpFormatter,
-        description="Grab and process the latest COVID-19 data",
-        epilog="E.g.: covid19_counter -i 600 -s",
+        description="Dowload and display the latest aggregated COVID19 data from: https://github.com/CSSEGISandData/COVID-19",
+        epilog="E.g.: covid19_counter -i 600 -c",
     )
     parser.add_argument(
         "-i",
@@ -67,28 +74,28 @@ def parse_args():
         help="interval in seconds between retrieving the data again, default one hour(3600s)",
     )
     parser.add_argument(
-        "-r",
-        "--record",
+        "-s",
+        "--stored",
         action="store_true",
         help="view a record of all changes in a continuously running loop",
     )
     parser.add_argument(
-        "-s",
-        "--split",
+        "-c",
+        "--compact",
         action="store_true",
-        help="split the display to fit smaller terminals",
+        help="compact the display to fit smaller terminals",
     )
     parser.add_argument(
-        "-w",
+        "-t",
         "--tweet",
         action="store_true",
-        help="Experimental: Send tweets on data changes, needs developer account",
+        help="sends tweets on data changes, needs developer account",
     )
     parser.add_argument(
-        "-wf",
-        "--tweet_force",
+        "-ft",
+        "--force_tweet",
         action="store_true",
-        help="Experimental: Sent a one-time tweet with current status, needs developer account",
+        help="send a one-time tweet with current status, needs developer account",
     )
     parser.add_argument(
         "-f",
@@ -103,7 +110,7 @@ def parse_args():
         help="turn on verbose messages, commands and outputs",
     )
     parser.add_argument(
-        "-t", "--test", action="store_true", help="run with a test file",
+        "-test", "--test", action="store_true", help="run with a test file",
     )
 
     return parser.parse_args()
@@ -146,15 +153,20 @@ def get_symbol(now, handle):
     global PREV_DEATHS
     global PREV_PERCENTAGE
 
-    store_the_change = True
+    # If 'now' is zero, there is an issue with the data and we should not
+    # store any data, or tweet results
+    if now == 0:
+        data_changed = False
+    else:
+        data_changed = True
 
     # Calculate the difference and marker
     if handle == "deaths":
         if PREV_DEATHS == 0 or PREV_DEATHS == now:
-            # Nothing has changed or nothing recorded (loop started)
+            # Nothing has changed or nothing stored (loop started)
             symbol = "<->"
             diff = 0
-            store_the_change = False
+            data_changed = False
         elif now > PREV_DEATHS:
             # Number of deaths has increased
             symbol = "^"
@@ -168,10 +180,10 @@ def get_symbol(now, handle):
 
     elif handle == "confirmed":
         if PREV_CONFIRMED == 0 or PREV_CONFIRMED == now:
-            # Nothing has changed or nothing recorded (loop started)
+            # Nothing has changed or nothing stored (loop started)
             symbol = "<->"
             diff = 0
-            store_the_change = False
+            data_changed = False
         elif now > PREV_CONFIRMED:
             # Number of confirmed has increased
             symbol = "^"
@@ -185,10 +197,10 @@ def get_symbol(now, handle):
 
     elif handle == "recovered":
         if PREV_RECOVERED == 0 or PREV_RECOVERED == now:
-            # Nothing has changed or nothing recorded (loop started)
+            # Nothing has changed or nothing stored (loop started)
             symbol = "<->"
             diff = 0
-            store_the_change = False
+            data_changed = False
         elif now > PREV_RECOVERED:
             # Number of recovered has increased
             symbol = "^"
@@ -203,10 +215,10 @@ def get_symbol(now, handle):
     else:  # percentage_deaths
         now = round(now, 2)
         if PREV_PERCENTAGE == 0 or PREV_PERCENTAGE == now:
-            # Nothing has changed or nothing recorded (loop started)
+            # Nothing has changed or nothing stored (loop started)
             symbol = "<->"
             diff = 0
-            store_the_change = False
+            data_changed = False
         elif now > PREV_PERCENTAGE:
             # Number of percent_died_round has increased
             symbol = "^"
@@ -220,7 +232,7 @@ def get_symbol(now, handle):
             # Store new previous percent_died_round
         PREV_PERCENTAGE = now
 
-    return (symbol, diff, store_the_change)
+    return (symbol, diff, data_changed)
 
 
 class Covid19:
@@ -234,7 +246,7 @@ class Covid19:
         """Initialize all variables from argparse if any."""
         self.force = args.force
         self.verbose = args.verbose
-        self.record = args.record
+        self.stored = args.stored
         self.test = args.test
         self.interval = args.interval
 
@@ -248,7 +260,7 @@ class Covid19:
             print(json_formatted_str)
         return response.json()
 
-    def display_record(self):
+    def display_stored(self):
         """Display contents of the history file.
 
         Create it the first time.
@@ -303,7 +315,7 @@ class Covid19:
 
         print_banner(
             "Force = {}, Verbose = {}, History = {}, Test = {}, Interval = {}".format(
-                self.force, self.verbose, self.record, self.test, self.interval
+                self.force, self.verbose, self.stored, self.test, self.interval
             )
         )
 
@@ -337,12 +349,12 @@ def main():
             covid19.display_user_inputs()
 
             # Purely view the statistics on a running loop
-            if args.record:
+            if args.stored:
                 while True:
                     print_banner(
                         "Historical Data {}, five minute loop:".format(HISTORY_FILE)
                     )
-                    covid19.display_record()
+                    covid19.display_stored()
                     time.sleep(350)  # Sleep 5m
                     print(chr(27) + "[2J")
 
@@ -397,7 +409,7 @@ def main():
             )
 
             # One time tweet of the latest data
-            if args.tweet_force:
+            if args.force_tweet:
                 tweet_message = "{} {}".format(message, TWEET_HASH_TAGS)
                 twitter = Twython(
                     CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
@@ -418,7 +430,7 @@ def main():
                 covid_file = open(HISTORY_FILE, "a+")
                 covid_file.write(message)
                 covid_file.close()
-                print("Recorded: {}: '{}'".format(covid_file, message))
+                print("Stored: {}: '{}'".format(covid_file, message))
 
                 # If twitter alerts enable send tweet
                 if args.tweet:
@@ -436,7 +448,7 @@ def main():
 
             interval_str = " {}s".format(args.interval)
             print()
-            if args.split:
+            if args.compact:
                 print(
                     colored(
                         "({}{}) Covid19!{}: \n".format(
@@ -454,64 +466,74 @@ def main():
                     end="",
                 )
 
-            # Print Confirmed
-            print(
-                colored(
-                    "Confirmed({})({}): {},".format(
-                        confirmed_symbol, confirmed_diff, confirmed
-                    ),
-                    "blue",
-                ),
-                end="",
-            )
-
-            # Print Recovered
-            print(
-                colored(
-                    " Recovered({})({}): {},".format(
-                        recovered_symbol, recovered_diff, recovered
-                    ),
-                    "green",
-                ),
-                end="",
-            )
-
-            # Print Deaths
-            print(
-                colored(
-                    " Deaths({})({}): {},".format(deaths_symbol, deaths_diff, deaths),
-                    "red",
-                ),
-                end="",
-            )
-
-            # Print percentage died
-            if args.split:
+            # Data can't be zero - or something has gone wrong - so print an
+            # error instead. Will not store or tweet either (unless forced)
+            if not (confirmed_diff == 0 or recovered_diff == 0 or deaths_diff == 0):
+                # Print Confirmed
                 print(
                     colored(
-                        " % Died({})({}): {}".format(
-                            percent_died_symbol,
-                            percent_died_diff,
-                            round(percent_died, 2),
+                        "Confirmed({})({}): {},".format(
+                            confirmed_symbol, confirmed_diff, confirmed
                         ),
-                        "magenta",
-                    )
+                        "blue",
+                    ),
+                    end="",
                 )
+
+                # Print Recovered
+                print(
+                    colored(
+                        " Recovered({})({}): {},".format(
+                            recovered_symbol, recovered_diff, recovered
+                        ),
+                        "green",
+                    ),
+                    end="",
+                )
+
+                # Print Deaths
+                print(
+                    colored(
+                        " Deaths({})({}): {},".format(
+                            deaths_symbol, deaths_diff, deaths
+                        ),
+                        "red",
+                    ),
+                    end="",
+                )
+
+                # Print percentage died
+                if args.compact:
+                    print(
+                        colored(
+                            " % Died({})({}): {}".format(
+                                percent_died_symbol,
+                                percent_died_diff,
+                                round(percent_died, 2),
+                            ),
+                            "magenta",
+                        )
+                    )
+                else:
+                    print(
+                        colored(
+                            " Percentage Died({})({}): {}".format(
+                                percent_died_symbol,
+                                percent_died_diff,
+                                round(percent_died, 2),
+                            ),
+                            "magenta",
+                        )
+                    )
+                print()
             else:
                 print(
-                    colored(
-                        " Percentage Died({})({}): {}".format(
-                            percent_died_symbol,
-                            percent_died_diff,
-                            round(percent_died, 2),
-                        ),
-                        "magenta",
+                    "Error: data issue - confirmed {}, recovered {}, deaths {}".format(
+                        confirmed, recovered, deaths
                     )
                 )
 
-            print()
-
-            if args.tweet_force:
+            if args.force_tweet:
                 sys.exit()
 
         except Exception:

@@ -1,6 +1,7 @@
 # covid19_counter
 
-Simple but somewhat morbid tool to display information about COVID19.
+Simple tool to display information about COVID19 and store and tweet out the
+details.
 
 Runs on a loop checking the number of Confirmed, Recovered and Deaths and also
 the percentage died.
