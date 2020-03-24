@@ -1,8 +1,7 @@
 #!/usr/local/bin/python3
 """Display information about COVID19.
 
-Runs on a loop checking the number of Confirmed, Recovered and Deaths and also
-the percentage died.
+Runs on a loop checking the number of Confirmed, Deaths and the percentage died.
 
 All data pulled from: https://github.com/CSSEGISandData/COVID-19
 
@@ -39,7 +38,6 @@ from auth import ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRE
 
 # Globals used to save previous vaues when a change occurs
 PREV_CONFIRMED = 0
-PREV_RECOVERED = 0
 PREV_DEATHS = 0
 PREV_PERCENTAGE = 0
 
@@ -48,11 +46,7 @@ init(autoreset=True)
 
 HOME = str(Path.home())
 HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
-TWEET_HASH_TAGS = (
-    "#Corona #StopCoronaVirus #coronavirus #CoronavirusPandemic #CoronaVirusUpdate "
-    "#covid19 #COVID2019 #COVID "
-    "#pandemic #pandemia"
-)
+TWEET_HASH_TAGS = "#coronavirus #covid19 #breaking #covid_19 #covid--19 #covid-19 #coronavirusoutbreak #covid2019 #coronaviruspandemic #corona #coronavirusupdates #pandemic"
 
 
 class AbortScriptException(Exception):
@@ -149,7 +143,6 @@ def get_symbol(now, handle):
     Called each time for a different statistic so the handle is unique.
     """
     global PREV_CONFIRMED
-    global PREV_RECOVERED
     global PREV_DEATHS
     global PREV_PERCENTAGE
 
@@ -194,23 +187,6 @@ def get_symbol(now, handle):
             diff = "-{}".format(PREV_CONFIRMED - now)
             # Store new previous confirmed
         PREV_CONFIRMED = now
-
-    elif handle == "recovered":
-        if PREV_RECOVERED == 0 or PREV_RECOVERED == now:
-            # Nothing has changed or nothing stored (loop started)
-            symbol = "<->"
-            diff = 0
-            data_changed = False
-        elif now > PREV_RECOVERED:
-            # Number of recovered has increased
-            symbol = "^"
-            diff = "+{}".format(now - PREV_RECOVERED)
-        else:
-            # Number of recovered has decreased (not possible?)
-            symbol = "v"
-            diff = "-{}".format(PREV_RECOVERED - now)
-            # Store new previous recovered
-        PREV_RECOVERED = now
 
     else:  # percentage_deaths
         now = round(now, 2)
@@ -279,22 +255,6 @@ class Covid19:
         with open(HISTORY_FILE, "r") as covid_file:
             print(colored(covid_file.read(), "red", "on_grey", ["bold"]))
 
-    def download_file2(self, url):
-        """Download a url contents carefully."""
-        if not self.test:
-            local_filename = url.split("/")[-1]
-            # NOTE the stream=True parameter below
-            with requests.get(url, stream=True) as req:
-                req.raise_for_status()
-                with open(local_filename, "wb") as file:
-                    for chunk in req.iter_content(chunk_size=8192):
-                        if chunk:  # filter out keep-alive new chunks
-                            file.write(chunk)
-                            # f.flush()
-            return local_filename
-        else:
-            return url
-
     def download_file(self, url):
         """Download a url contents using urllib3."""
         if self.test:
@@ -342,7 +302,10 @@ class Covid19:
 def main():
     """Call everything."""
     args = parse_args()
-    sleep_interval = args.interval
+    if args.test:
+        sleep_interval = 10
+    else:
+        sleep_interval = args.interval
 
     while True:
         try:
@@ -365,26 +328,17 @@ def main():
             if args.test:
                 url = "Test_Data/Deaths.csv"
             else:
-                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
             deaths = int(covid19.get_csv_crunch_total(url))
             deaths_symbol, deaths_diff, death_store = get_symbol(deaths, "deaths")
 
             if args.test:
                 url = "Test_Data/Confirmed.csv"
             else:
-                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
             confirmed = int(covid19.get_csv_crunch_total(url))
             confirmed_symbol, confirmed_diff, confirmed_store = get_symbol(
                 confirmed, "confirmed"
-            )
-
-            if args.test:
-                url = "Test_Data/Recovered.csv"
-            else:
-                url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
-            recovered = int(covid19.get_csv_crunch_total(url))
-            recovered_symbol, recovered_diff, recovered_store = get_symbol(
-                recovered, "recovered"
             )
 
             percent_died = ((deaths / confirmed) * 100) if confirmed != 0 else 0
@@ -392,15 +346,12 @@ def main():
                 percent_died, "percent_died_round"
             )
 
-            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            message = "COVID19 Report({}):: Confirmed({})({}): {}, Recovered({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
+            dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
+            message = "COVID19 Report({}):: Confirmed({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
                 dt_string,
                 confirmed_symbol,
                 confirmed_diff,
                 confirmed,
-                recovered_symbol,
-                recovered_diff,
-                recovered,
                 deaths_symbol,
                 deaths_diff,
                 deaths,
@@ -421,10 +372,7 @@ def main():
             # If any change store in a file for historical purposes
             # and send tweet if requested
             if (
-                death_store
-                or confirmed_store
-                or recovered_store
-                or percentage_died_store
+                death_store or confirmed_store or percentage_died_store
             ) and not args.test:
 
                 # Update log file
@@ -452,7 +400,7 @@ def main():
             if args.compact:
                 print(
                     colored(
-                        "({}{}) Covid19!{}: \n".format(
+                        "({}{}) Covid19 Report{}: \n".format(
                             dt_string, interval_str, test_str
                         ),
                         "cyan",
@@ -461,7 +409,7 @@ def main():
             else:
                 print(
                     colored(
-                        "({}{}) Covid19!:{} ".format(dt_string, interval_str, test_str),
+                        "({}{}) Covid19 Report:{} ".format(dt_string, interval_str, test_str),
                         "cyan",
                     ),
                     end="",
@@ -469,9 +417,12 @@ def main():
 
             # Data can't be zero - or something has gone wrong - so print an
             # error instead. Will not store or tweet either (unless forced)
-            if not (confirmed == 0 or recovered == 0 or deaths == 0):
+            if not (confirmed == 0 or deaths == 0):
                 # Set sleep interval to the default or inputted
-                sleep_interval = args.interval
+                if args.test:
+                    sleep_interval = 10
+                else:
+                    sleep_interval = args.interval
 
                 # Print Confirmed
                 print(
@@ -480,17 +431,6 @@ def main():
                             confirmed_symbol, confirmed_diff, confirmed
                         ),
                         "blue",
-                    ),
-                    end="",
-                )
-
-                # Print Recovered
-                print(
-                    colored(
-                        " Recovered({})({}): {},".format(
-                            recovered_symbol, recovered_diff, recovered
-                        ),
-                        "green",
                     ),
                     end="",
                 )
@@ -535,8 +475,8 @@ def main():
                 sleep_interval = 60
                 print(
                     colored(
-                        "Error: data issue - Confirmed {}, Recovered {}, Deaths {}".format(
-                            confirmed, recovered, deaths
+                        "Error: data issue - Confirmed {}, Deaths {}".format(
+                            confirmed, deaths
                         ),
                         "red",
                         "on_white",
@@ -551,6 +491,7 @@ def main():
             print("Exception caught:")
             print(sys.exc_info())
             raise
+
         time.sleep(sleep_interval)
 
 
