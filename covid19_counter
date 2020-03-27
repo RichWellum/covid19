@@ -34,7 +34,10 @@ from colorama import init
 from termcolor import colored
 from twython import Twython
 
-from auth import ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
+try:
+    from auth import ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET
+except Exception as err:
+    print(f"Note: No auth.py file found in repo: {err}\n")
 
 # Globals used to save previous vaues when a change occurs
 PREV_CONFIRMED = 0
