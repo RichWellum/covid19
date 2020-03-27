@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="covid19-counter_pkg-richwellum",
-    version="0.0.5",
+    version="0.0.6",
     scripts=['covid19_counter'],
     author="Richard Wellum",
     author_email="richwellum@gmail.com",
