@@ -353,7 +353,7 @@ def main():
             )
 
             dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-            message = "COVID19 Report({}):: Confirmed({})({}): {:,}, Deaths({})({}): {:,}, % Died({})({}): {:,}\n".format(
+            message = "COVID19 Report({}):: Confirmed({})({}): {:,}, Deaths({})({}): {:,}, % Died({})({}): {}\n".format(
                 dt_string,
                 confirmed_symbol,
                 confirmed_diff,
@@ -457,7 +457,7 @@ def main():
                 if args.compact:
                     print(
                         colored(
-                            " % Died({})({}): {:,}".format(
+                            " % Died({})({}): {}".format(
                                 percent_died_symbol,
                                 percent_died_diff,
                                 round(percent_died, 2),
