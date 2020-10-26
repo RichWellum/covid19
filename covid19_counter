@@ -319,7 +319,8 @@ def main():
             if args.stored:
                 while True:
                     print_banner(
-                        "Historical Data {}, five minute loop:".format(HISTORY_FILE)
+                        "Historical Data {}, five minute loop:".format(
+                            HISTORY_FILE)
                     )
                     covid19.display_stored()
                     time.sleep(350)  # Sleep 5m
@@ -333,7 +334,8 @@ def main():
             else:
                 url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
             deaths = int(covid19.get_csv_crunch_total(url))
-            deaths_symbol, deaths_diff, death_store = get_symbol(deaths, "deaths")
+            deaths_symbol, deaths_diff, death_store = get_symbol(
+                deaths, "deaths")
 
             if args.test:
                 url = "Test_Data/Confirmed.csv"
@@ -344,13 +346,14 @@ def main():
                 confirmed, "confirmed"
             )
 
-            percent_died = ((deaths / confirmed) * 100) if confirmed != 0 else 0
+            percent_died = ((deaths / confirmed) *
+                            100) if confirmed != 0 else 0
             percent_died_symbol, percent_died_diff, percentage_died_store = get_symbol(
                 percent_died, "percent_died_round"
             )
 
             dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-            message = "COVID19 Report({}):: Confirmed({})({}): {}, Deaths({})({}): {}, % Died({})({}): {}\n".format(
+            message = "COVID19 Report({}):: Confirmed({})({}): {:,}, Deaths({})({}): {:,}, % Died({})({}): {:,}\n".format(
                 dt_string,
                 confirmed_symbol,
                 confirmed_diff,
@@ -365,7 +368,7 @@ def main():
 
             # One time tweet of the latest data
             if args.force_tweet:
-                tweet_message = "{} {}".format(message, TWEET_HASH_TAGS)
+                tweet_message = f"{message} {TWEET_HASH_TAGS}"
                 twitter = Twython(
                     CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
                 )
@@ -412,7 +415,8 @@ def main():
             else:
                 print(
                     colored(
-                        "({}{}) Covid19 Report:{} ".format(dt_string, interval_str, test_str),
+                        "({}{}) Covid19 Report:{} ".format(
+                            dt_string, interval_str, test_str),
                         "cyan",
                     ),
                     end="",
@@ -430,7 +434,7 @@ def main():
                 # Print Confirmed
                 print(
                     colored(
-                        "Confirmed({})({}): {},".format(
+                        "Confirmed({})({}): {:,},".format(
                             confirmed_symbol, confirmed_diff, confirmed
                         ),
                         "blue",
@@ -441,7 +445,7 @@ def main():
                 # Print Deaths
                 print(
                     colored(
-                        " Deaths({})({}): {},".format(
+                        " Deaths({})({}): {:,},".format(
                             deaths_symbol, deaths_diff, deaths
                         ),
                         "red",
@@ -453,7 +457,7 @@ def main():
                 if args.compact:
                     print(
                         colored(
-                            " % Died({})({}): {}".format(
+                            " % Died({})({}): {:,}".format(
                                 percent_died_symbol,
                                 percent_died_diff,
                                 round(percent_died, 2),
@@ -464,7 +468,7 @@ def main():
                 else:
                     print(
                         colored(
-                            " Percentage Died({})({}): {}".format(
+                            " Percentage Died({})({}): {:,}".format(
                                 percent_died_symbol,
                                 percent_died_diff,
                                 round(percent_died, 2),
