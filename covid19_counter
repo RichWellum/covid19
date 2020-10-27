@@ -49,7 +49,7 @@ init(autoreset=True)
 
 HOME = str(Path.home())
 HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
-TWEET_HASH_TAGS = "#coronavirus #covid19 #breaking #covid_19 #coronavirusoutbreak #covid2019 #coronaviruspandemic #corona #coronavirusupdates #pandemic"
+TWEET_HASH_TAGS = "#COVID19 #COVID-19 #covid19 #covid_19"
 
 
 class AbortScriptException(Exception):
@@ -353,7 +353,7 @@ def main():
             )
 
             dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-            message = "COVID19 Report({}):: Confirmed({})({}): {:,}, Deaths({})({}): {:,}, % Died({})({}): {}\n".format(
+            message = "Global COVID19 Report({})::\nConfirmed cases({})({}): {:,}\nTotal Deaths({})({}): {:,}\n%Died({})({}): {}\n{}".format(
                 dt_string,
                 confirmed_symbol,
                 confirmed_diff,
@@ -364,16 +364,17 @@ def main():
                 percent_died_symbol,
                 percent_died_diff,
                 round(percent_died, 2),
+                TWEET_HASH_TAGS
             )
-
+            print(message)
             # One time tweet of the latest data
             if args.force_tweet:
-                tweet_message = f"{message} {TWEET_HASH_TAGS}"
+                # tweet_message = f"{message} {TWEET_HASH_TAGS}"
                 twitter = Twython(
                     CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
                 )
-                twitter.update_status(status=tweet_message)
-                print("Tweeted: {}".format(tweet_message))
+                twitter.update_status(status=message)
+                print("Tweeted: {}".format(message))
 
             # If any change store in a file for historical purposes
             # and send tweet if requested
@@ -389,12 +390,12 @@ def main():
 
                 # If twitter alerts enable send tweet
                 if args.tweet:
-                    tweet_message = "{} {}".format(message, TWEET_HASH_TAGS)
+                    # tweet_message = "{} {}".format(message, TWEET_HASH_TAGS)
                     twitter = Twython(
                         CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
                     )
-                    twitter.update_status(status=tweet_message)
-                    print("Tweeted: {}".format(tweet_message))
+                    twitter.update_status(status=message)
+                    print("Tweeted: {}".format(message))
 
             # Print header
             test_str = ""
