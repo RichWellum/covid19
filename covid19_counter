@@ -353,7 +353,7 @@ def main():
             )
 
             dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-            message = "Global COVID19 Report({})::\nConf({})({}): {:,}\nDeaths({})({}): {:,}\n%Died({})({}): {}\n{}".format(
+            message = "COVID19({})=>\nConf({})({}): {:,}\nDeaths({})({}): {:,}\n%Died({})({}): {}\n{}".format(
                 dt_string,
                 confirmed_symbol,
                 confirmed_diff,
