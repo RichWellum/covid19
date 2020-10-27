@@ -49,7 +49,7 @@ init(autoreset=True)
 
 HOME = str(Path.home())
 HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
-TWEET_HASH_TAGS = "#COVID19 #COVID-19 #covid19 #covid_19"
+TWEET_HASH_TAGS = "#COVID19 #COVID_19"
 
 
 class AbortScriptException(Exception):
@@ -353,7 +353,7 @@ def main():
             )
 
             dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-            message = "Global COVID19 Report({})::\nConfirmed cases({})({}): {:,}\nTotal Deaths({})({}): {:,}\n%Died({})({}): {}\n{}".format(
+            message = "Global COVID19 Report({})::\nConf({})({}): {:,}\nDeaths({})({}): {:,}\n%Died({})({}): {}\n{}".format(
                 dt_string,
                 confirmed_symbol,
                 confirmed_diff,
