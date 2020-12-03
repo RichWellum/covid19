@@ -107,7 +107,10 @@ def parse_args():
         help="turn on verbose messages, commands and outputs",
     )
     parser.add_argument(
-        "-test", "--test", action="store_true", help="run with a test file",
+        "-test",
+        "--test",
+        action="store_true",
+        help="run with a test file",
     )
 
     return parser.parse_args()
@@ -318,10 +321,7 @@ def main():
             # Purely view the statistics on a running loop
             if args.stored:
                 while True:
-                    print_banner(
-                        "Historical Data {}, five minute loop:".format(
-                            HISTORY_FILE)
-                    )
+                    print_banner("Historical Data {}, five minute loop:".format(HISTORY_FILE))
                     covid19.display_stored()
                     time.sleep(350)  # Sleep 5m
                     print(chr(27) + "[2J")
@@ -334,20 +334,16 @@ def main():
             else:
                 url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
             deaths = int(covid19.get_csv_crunch_total(url))
-            deaths_symbol, deaths_diff, death_store = get_symbol(
-                deaths, "deaths")
+            deaths_symbol, deaths_diff, death_store = get_symbol(deaths, "deaths")
 
             if args.test:
                 url = "Test_Data/Confirmed.csv"
             else:
                 url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
             confirmed = int(covid19.get_csv_crunch_total(url))
-            confirmed_symbol, confirmed_diff, confirmed_store = get_symbol(
-                confirmed, "confirmed"
-            )
+            confirmed_symbol, confirmed_diff, confirmed_store = get_symbol(confirmed, "confirmed")
 
-            percent_died = ((deaths / confirmed) *
-                            100) if confirmed != 0 else 0
+            percent_died = ((deaths / confirmed) * 100) if confirmed != 0 else 0
             percent_died_symbol, percent_died_diff, percentage_died_store = get_symbol(
                 percent_died, "percent_died_round"
             )
@@ -364,23 +360,19 @@ def main():
                 percent_died_symbol,
                 percent_died_diff,
                 round(percent_died, 2),
-                TWEET_HASH_TAGS
+                TWEET_HASH_TAGS,
             )
-            print(message)
+
             # One time tweet of the latest data
             if args.force_tweet:
                 # tweet_message = f"{message} {TWEET_HASH_TAGS}"
-                twitter = Twython(
-                    CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-                )
+                twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
                 twitter.update_status(status=message)
                 print("Tweeted: {}".format(message))
 
             # If any change store in a file for historical purposes
             # and send tweet if requested
-            if (
-                death_store or confirmed_store or percentage_died_store
-            ) and not args.test:
+            if (death_store or confirmed_store or percentage_died_store) and not args.test:
 
                 # Update log file
                 covid_file = open(HISTORY_FILE, "a+")
@@ -407,17 +399,14 @@ def main():
             if args.compact:
                 print(
                     colored(
-                        "({}{}) Covid19 Report{}: \n".format(
-                            dt_string, interval_str, test_str
-                        ),
+                        "({}{}) Covid19 Report{}: \n".format(dt_string, interval_str, test_str),
                         "cyan",
                     )
                 )
             else:
                 print(
                     colored(
-                        "({}{}) Covid19 Report:{} ".format(
-                            dt_string, interval_str, test_str),
+                        "({}{}) Covid19 Report:{} ".format(dt_string, interval_str, test_str),
                         "cyan",
                     ),
                     end="",
@@ -446,9 +435,7 @@ def main():
                 # Print Deaths
                 print(
                     colored(
-                        " Deaths({})({}): {:,},".format(
-                            deaths_symbol, deaths_diff, deaths
-                        ),
+                        " Deaths({})({}): {:,},".format(deaths_symbol, deaths_diff, deaths),
                         "red",
                     ),
                     end="",
@@ -483,9 +470,7 @@ def main():
                 sleep_interval = 60
                 print(
                     colored(
-                        "Error: data issue - Confirmed {}, Deaths {}".format(
-                            confirmed, deaths
-                        ),
+                        "Error: data issue - Confirmed {}, Deaths {}".format(confirmed, deaths),
                         "red",
                         "on_white",
                         ["bold", "blink"],
