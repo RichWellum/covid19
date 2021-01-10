@@ -49,7 +49,7 @@ init(autoreset=True)
 
 HOME = str(Path.home())
 HISTORY_FILE = "{}/covid19_history.dat".format(HOME)
-TWEET_HASH_TAGS = "#COVID19 #COVID_19"
+TWEET_HASH_TAGS = "#covid #corona #COVID19 #COVID-19 #Coronavirus #CoronaUpdate #Lockdown #StayHome #socialdistancing #pandemic #StaySafeStayHome"
 
 
 class AbortScriptException(Exception):
